@@ -1,0 +1,9 @@
+[build]
+  publish = "."
+
+[build.environment]
+  # @netlify/blobs necesita Node 22.12 o más nuevo al instalar
+  NODE_VERSION = "22"
+
+[functions]
+  directory = "netlify/functions"
