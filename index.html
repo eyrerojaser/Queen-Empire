@@ -320,7 +320,7 @@
   .gate-sheet { width: 100%; max-width: 440px; margin: auto; padding: 30px 24px calc(30px + env(safe-area-inset-bottom, 0px)); border-radius: 28px; background: var(--surface); text-align: center; }
   .gate-sheet h2 { margin: 6px 0 4px; font-family: var(--font-logo); font-weight: 400; font-size: 42px; color: var(--accent); }
   .gate-sheet p.gate-sub { margin: 0 0 20px; font-size: 14.5px; color: var(--ink-soft); }
-  .gate-sheet .field { text-align: left; margin-bottom: 12px; }
+  .gate-sheet .gfield { text-align: left; margin-bottom: 12px; }
   .gate-err { min-height: 18px; margin: 2px 0 10px; font-size: 13px; font-weight: 700; color: #B0453D; }
 
   /* ---------- Fechas importantes ---------- */
@@ -353,9 +353,9 @@
   <div class="gate-sheet">
     <h2 id="gateH">Bienvenida</h2>
     <p class="gate-sub">Para empezar a usar tu calendario, cuéntame quién eres.</p>
-    <div class="field"><label class="lbl" for="gName">Nombre</label><input class="field" id="gName" type="text" maxlength="60" autocomplete="given-name"></div>
-    <div class="field"><label class="lbl" for="gLast">Apellido</label><input class="field" id="gLast" type="text" maxlength="60" autocomplete="family-name"></div>
-    <div class="field"><label class="lbl" for="gEmail">Correo electrónico</label><input class="field" id="gEmail" type="email" maxlength="160" autocomplete="email" inputmode="email"></div>
+    <div class="gfield"><label class="lbl" for="gName">Nombre</label><input class="field" id="gName" type="text" maxlength="60" autocomplete="given-name"></div>
+    <div class="gfield"><label class="lbl" for="gLast">Apellido</label><input class="field" id="gLast" type="text" maxlength="60" autocomplete="family-name"></div>
+    <div class="gfield"><label class="lbl" for="gEmail">Correo electrónico</label><input class="field" id="gEmail" type="email" maxlength="160" autocomplete="email" inputmode="email"></div>
     <input type="text" id="gWeb" name="web" autocomplete="off" tabindex="-1" style="position:absolute;left:-9999px;width:1px;height:1px" aria-hidden="true">
     <p class="gate-err" id="gateErr"></p>
     <button class="done-btn solid" id="gateGo" type="button">Continuar</button>
