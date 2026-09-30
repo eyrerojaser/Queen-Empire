@@ -11,6 +11,9 @@ Se publica desde **GitHub → Netlify**.
 - **Sincronización** de todo entre tus dispositivos con un código.
 - **Respaldo**: descargar e importar una copia de todo.
 - **Registro de clientas**: antes de entrar por primera vez, la persona escribe su nombre, apellido y correo. Tú ves esa lista en un **panel de administración** aparte, protegido con una contraseña que tú eliges.
+- **Fechas importantes**: los días festivos de Estados Unidos aparecen solos en el calendario, y puedes agregar tus propias fechas (cumpleaños, aniversarios) que se repiten cada año.
+- **Estación automática**: el fondo y los colores cambian solos según el mes que estás viendo (puedes fijar una estación manualmente si prefieres).
+- **Galería**: reúne en un solo lugar las fotos que has puesto en los días del calendario y en My Vision. Tocar una foto te lleva directo a ese día o esa nota.
 
 ## Por qué hace falta GitHub
 

@@ -322,6 +322,28 @@
   .gate-sheet p.gate-sub { margin: 0 0 20px; font-size: 14.5px; color: var(--ink-soft); }
   .gate-sheet .field { text-align: left; margin-bottom: 12px; }
   .gate-err { min-height: 18px; margin: 2px 0 10px; font-size: 13px; font-weight: 700; color: #B0453D; }
+
+  /* ---------- Fechas importantes ---------- */
+  .day .special { position: absolute; top: 4px; left: 5px; width: 14px; height: 14px; color: var(--accent); }
+  .day.has-photo .special { color: #fff; filter: drop-shadow(0 1px 2px rgba(0,0,0,.4)); }
+  .specials { display: flex; flex-direction: column; gap: 8px; margin: 0 0 14px; }
+  .srow { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 16px; background: var(--bg-a); border: 1px solid var(--line); }
+  .srow .sic { flex: none; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; background: color-mix(in srgb, var(--accent) 16%, var(--surface)); color: var(--accent); }
+  .srow .stxt { flex: 1; font-size: 14.5px; font-weight: 700; }
+  .srow .sdel { flex: none; width: 30px; height: 30px; display: grid; place-items: center; border: 0; background: transparent; color: var(--ink-soft); cursor: pointer; }
+  .add-date { height: 44px; margin: 0 0 6px; border: 2px dashed var(--accent); color: var(--accent); font-weight: 800; }
+
+  /* ---------- Galería ---------- */
+  .ghero { padding: 22px 18px 20px; }
+  .ghero h2 { margin: 0; font-family: var(--font-logo); font-weight: 400; font-size: clamp(48px, 13vw, 76px); color: var(--accent); }
+  .gtabs { display: flex; gap: 8px; padding: 0 18px 14px; overflow-x: auto; }
+  .ggroup { margin: 0 18px 22px; }
+  .ggroup h3 { margin: 0 0 10px; font-size: 15px; color: var(--ink-soft); }
+  .ggrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  @media (min-width: 640px) { .ggrid { grid-template-columns: repeat(5, 1fr); } }
+  .gtile { position: relative; aspect-ratio: 1; padding: 0; border: 0; border-radius: 14px; overflow: hidden; cursor: pointer; background: var(--soft); }
+  .gtile img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .g-empty { margin: 10px 18px; color: var(--ink-soft); font-size: 14px; line-height: 1.5; }
   .toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 80; max-width: 90vw; padding: 12px 18px; border-radius: 99px; background: var(--ink); color: var(--bg-a); font-size: 14px; font-weight: 700; }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
@@ -355,7 +377,7 @@
       <button class="nav-btn active" type="button" data-nav="home"><i data-ic="home"></i><span>Inicio</span></button>
       <button class="nav-btn" type="button" data-nav="goals"><i data-ic="target"></i><span>Metas</span></button>
       <button class="nav-btn" type="button" data-nav="cal"><i data-ic="calendar"></i><span>Calendario</span></button>
-      <button class="nav-btn" type="button" data-nav="later"><i data-ic="image"></i><span>Galería</span></button>
+      <button class="nav-btn" type="button" data-nav="gallery"><i data-ic="image"></i><span>Galería</span></button>
       <button class="nav-btn" type="button" data-nav="vision"><i data-ic="eye"></i><span>My Vision</span></button>
     </div>
     <button class="add-btn" id="addBtn" type="button"><i data-ic="plus"></i><span>Agregar</span></button>
@@ -398,6 +420,12 @@
     <div class="chips" id="chips"></div>
   </section>
 
+  <section class="gallery" id="galleryView" hidden aria-label="Galería">
+    <div class="ghero"><h2>Galería</h2></div>
+    <div class="gtabs" id="gTabs" role="group" aria-label="Filtrar galería"></div>
+    <div id="gBody"></div>
+  </section>
+
   <section class="vision" id="visionView" hidden aria-label="My Vision">
     <div class="vhero">
       <svg class="v-deco" id="vDeco" viewBox="0 0 220 130" aria-hidden="true"></svg>
@@ -429,6 +457,10 @@
     <div class="catpick" id="catPick" role="radiogroup" aria-label="Categoría"></div>
     <label class="lbl" for="dText">Mis propósitos del día</label>
     <textarea id="dText" placeholder="Escribe lo que quieres lograr. Una cosa por línea."></textarea>
+    <p class="lbl" style="margin:18px 0 8px">Fechas importantes</p>
+    <div class="specials" id="dSpecials"></div>
+    <button class="ghost-btn add-date" id="dDateAdd" type="button"><i data-ic="plus"></i>Agregar fecha importante</button>
+
     <p class="lbl" style="margin:18px 0 8px">Actividades con hora</p>
     <div class="acts" id="dActs"></div>
     <button class="ghost-btn add-act" id="dActAdd" type="button"><i data-ic="plus"></i>Agregar actividad</button>
@@ -553,6 +585,21 @@
   </div>
 </div>
 
+<!-- Fecha importante -->
+<div class="scrim" id="m-date">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="dtHeading" tabindex="-1">
+    <div class="sh-head">
+      <div><p class="sh-dow">Se repite cada año</p><h2 class="sh-date" id="dtHeading">Fecha importante</h2></div>
+      <button class="icon-btn close" type="button" aria-label="Cerrar"></button>
+    </div>
+    <label class="lbl" for="dtTitle">¿Qué se celebra?</label>
+    <input class="field" id="dtTitle" type="text" maxlength="60" placeholder="Ej. Cumpleaños de mamá">
+    <p class="lbl">Tipo</p>
+    <div class="catpick" id="dtKind" role="radiogroup" aria-label="Tipo"></div>
+    <button class="done-btn solid" id="dtSave" type="button" style="margin-top:8px">Guardar</button>
+  </div>
+</div>
+
 <!-- My Vision: nota -->
 <div class="scrim" id="m-vis">
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="vHeading" tabindex="-1">
@@ -639,7 +686,9 @@
     plane: '<path d="M21 3L10 14M21 3l-7 18-4-7-7-4z"/>',
     folder: '<path d="M3.5 6.5a2 2 0 0 1 2-2H10l2 2.5h6.5a2 2 0 0 1 2 2v8.500a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/>',
     bulb: '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.500 10.900c.6.5 1 1.200 1 2V16h5v-.1c0-.8.4-1.500 1-2A6 6 0 0 0 12 3z"/>',
-    sparkle: '<path d="M11 3l1.800 5.200L18 10l-5.200 1.800L11 17l-1.800-5.200L4 10l5.200-1.800z"/><path d="M19 15l.7 1.800 1.800.7-1.800.7L19 20l-.7-1.800-1.800-.7 1.800-.7z"/>'
+    sparkle: '<path d="M11 3l1.800 5.200L18 10l-5.200 1.800L11 17l-1.800-5.200L4 10l5.200-1.800z"/><path d="M19 15l.7 1.800 1.800.7-1.800.7L19 20l-.7-1.800-1.800-.7 1.800-.7z"/>',
+    cake: '<path d="M4 20h16v-6.5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2z"/><path d="M4 16.5h16M9 11.5v-2M15 11.5v-2M12 11.5v-3M9 6c0-1 .700-1.400.700-2.200S9 2 9 2M12 6c0-1 .7-1.400.7-2.2S12 2 12 2M15 6c0-1 .7-1.400.7-2.2S15 2 15 2"/>',
+    flag: '<path d="M6 21V4"/><path d="M6 4.5h12l-3.5 3.7 3.5 3.8H6"/>'
   };
   function svg(name, size, sw, fill) {
     return '<svg viewBox="0 0 24 24" width="' + (size || 20) + '" height="' + (size || 20) + '" fill="' + (fill || 'none') +
@@ -777,10 +826,10 @@
   let dirty = false, saveTimer = null, prefsTimer = null, navToken = 0;
   let openDay = null, openGoalId = null, modal = null, modalReturn = null, filterCat = null, newSwatch = SWATCHES[0];
 
-  const isDataKey = k => k === 'prefs' || k === 'acts' || k === 'vision' || /^m:\d{4}-\d{2}$/.test(k);
+  const isDataKey = k => k === 'prefs' || k === 'acts' || k === 'vision' || k === 'dates' || /^m:\d{4}-\d{2}$/.test(k);
   const monthKey = (y, m) => 'm:' + y + '-' + String(m + 1).padStart(2, '0');
   const daysInMonth = () => new Date(cur.y, cur.m + 1, 0).getDate();
-  const season = () => prefs.season || seasonOfMonth(now0.getMonth());
+  const season = () => prefs.season || seasonOfMonth(cur.m);
 
   function setStatus(state) {
     const txt = !persistent ? 'Este navegador no permite guardar: tus cambios se perderán al cerrar'
@@ -847,6 +896,10 @@
     document.documentElement.dataset.season = s;
     // selector
     const box = $('#seasons'); box.replaceChildren();
+    const autoBtn = el('button', { type: 'button', class: 'spill' + (!prefs.season ? ' on' : ''), 'aria-pressed': String(!prefs.season), 'aria-label': 'Automático, según el mes' });
+    autoBtn.innerHTML = svg('calendar', 20, 2) + '<span>Automático</span>';
+    autoBtn.addEventListener('click', () => { prefs.season = null; savePrefs(); renderTheme(); renderHeader(); renderGoals(); renderCalendar(); });
+    box.append(autoBtn);
     SEASON_ORDER.forEach(k => {
       const b = el('button', { type: 'button', class: 'spill' + (k === s ? ' on' : ''), 'aria-pressed': String(k === s), 'aria-label': SEASONS[k].name });
       b.innerHTML = svg(SEASONS[k].icon, 20, 2) + '<span>' + SEASONS[k].name + '</span>';
@@ -937,16 +990,18 @@
     const lines = (info.text || '').split('\n').map(s => s.trim()).filter(Boolean);
     const dayActs = actsOn(dstr(cur.y, cur.m, d));
     const a0 = dayActs[0];
-    const hasContent = !!(lines.length || info.photo || cat || info.done || dayActs.length);
-    const label = lines[0] || (a0 ? (a0.time ? a0.time + ' ' : '') + a0.title : (cat ? cat.name : (info.done ? 'Completado' : '')));
+    const specials = specialsOn(cur.y, cur.m, d), sp0 = specials[0];
+    const hasContent = !!(lines.length || info.photo || cat || info.done || dayActs.length || specials.length);
+    const label = lines[0] || (a0 ? (a0.time ? a0.time + ' ' : '') + a0.title : (cat ? cat.name : (sp0 ? sp0.title : (info.done ? 'Completado' : ''))));
     const hasRem = dayActs.some(a => a.remind != null && a.time && !a.done);
     b.className = 'day' + (isToday ? ' today' : '') + (info.photo ? ' has-photo' : '') + (info.done ? ' done' : '') + (filterCat && info.cat && info.cat !== filterCat ? ' dim' : '') + (filterCat && info.cat === filterCat ? ' match' : '');
     b.style.setProperty('--cat', cat ? cat.color : 'var(--accent)');
-    b.setAttribute('aria-label', d + ' de ' + MONTHS[cur.m] + (isToday ? ', hoy' : '') + (label ? ', ' + label : '') + (dayActs.length ? ', ' + dayActs.length + (dayActs.length === 1 ? ' actividad' : ' actividades') : '') + (info.done ? ', completado' : ''));
+    b.setAttribute('aria-label', d + ' de ' + MONTHS[cur.m] + (isToday ? ', hoy' : '') + (label ? ', ' + label : '') + (dayActs.length ? ', ' + dayActs.length + (dayActs.length === 1 ? ' actividad' : ' actividades') : '') + (specials.length ? ', ' + specials.map(x => x.title).join(', ') : '') + (info.done ? ', completado' : ''));
     b.replaceChildren();
     const okIcon = () => { const s = el('span', { class: 'ok' }); s.innerHTML = svg('check', 12, 3.4); return s; };
     const mkNum = () => { const n = el('span', { class: 'num', text: String(d) }); if (hasRem) n.insertAdjacentHTML('beforeend', svg('bell', 12, 2.4).replace('<svg', '<svg class="bell"')); return n; };
     const tickIcon = () => { const s = el('span', { class: 'tick' }); s.innerHTML = svg('check', 10, 3.6); return s; };
+    if (specials.length) { const sp = el('span', { class: 'special' }); sp.innerHTML = svg(sp0.kind === 'holiday' ? 'flag' : DATE_KIND[sp0.kind].icon, 14, 2.4); b.append(sp); }
     if (info.photo) {
       const im = el('img', { class: 'ph', alt: '', decoding: 'async' }); im.src = info.photo; b.append(im);
       b.append(mkNum());
@@ -1037,7 +1092,7 @@
     $('#dDow').textContent = DOW_FULL[new Date(cur.y, cur.m, d).getDay()];
     $('#dDate').textContent = d + ' de ' + MONTHS[cur.m];
     $('#dText').value = (data.days[d] && data.days[d].text) || '';
-    renderDayPhoto(); renderCatPick(); updateDoneBtn(); renderDayActs();
+    renderDayPhoto(); renderCatPick(); updateDoneBtn(); renderDayActs(); renderDaySpecials();
     openModal('m-day', { from: trigger, focus: '#dText' });
   }
   onClose['m-day'] = () => { openDay = null; };
@@ -1148,17 +1203,18 @@
     view = v; o = o || {};
     ['.hero', '.panel', '.cats'].forEach(q => { $(q).hidden = v !== 'cal'; });
     $('#visionView').hidden = v !== 'vision';
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', v === 'vision' ? b.dataset.nav === 'vision' : b.dataset.nav === (o.nav || 'home')));
+    $('#galleryView').hidden = v !== 'gallery';
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', (v === 'vision' || v === 'gallery') ? b.dataset.nav === v : b.dataset.nav === (o.nav || 'home')));
     if (v === 'vision') renderVision();
+    if (v === 'gallery') { renderGallery(); loadGallery().then(renderGallery); }
     const act = $('.nav-btn.active'), box = $('.nav-items');
     if (act && box) box.scrollTo({ left: Math.max(0, act.offsetLeft - 12), behavior: 'auto' });
     try { history.replaceState(null, '', v === 'vision' ? '#vision' : location.pathname + location.search); } catch (e) {}
   }
   document.querySelectorAll('.nav-btn').forEach(b => b.addEventListener('click', () => {
     const k = b.dataset.nav;
-    if (k === 'later') { toast('Esta pantalla la creamos después'); return; }
     closeModal(true);
-    if (k === 'vision') { setView('vision'); window.scrollTo({ top: 0, behavior: smooth() }); return; }
+    if (k === 'vision' || k === 'gallery') { setView(k); window.scrollTo({ top: 0, behavior: smooth() }); return; }
     if (view !== 'cal') setView('cal', { nav: k });
     document.querySelectorAll('.nav-btn').forEach(x => x.classList.toggle('active', x === b));
     requestAnimationFrame(() => {
@@ -1174,7 +1230,7 @@
       if (t !== navToken) return;
       dataKey = k;
       data = Object.assign(blank(), v && typeof v === 'object' ? v : {});
-      renderHeader(); renderGoals(); renderCalendar();
+      renderTheme(); renderHeader(); renderGoals(); renderCalendar();
     });
   }
   function go(dm) {
@@ -1225,7 +1281,7 @@
     prefs = Object.assign(defaultPrefs(), p && typeof p === 'object' ? p : {});
     if (prefs.season && !SEASONS[prefs.season]) prefs.season = null;
     renderTheme(); renderChips(); renderHeader(); syncSeg();
-    await Promise.all([loadActs(), loadVision()]); renderVision(); schedulePushSync();
+    await Promise.all([loadActs(), loadVision(), loadDates()]); renderVision(); schedulePushSync();
     await showMonth();
     toast('Respaldo importado (' + n + ' elementos)');
   }
@@ -1335,7 +1391,7 @@
             const val = await internalize(r.value);
             if (val && typeof val === 'object') {
               val._u = r.u; await kvSet(k, val);
-              if (k === 'prefs') refreshPrefs = true; else if (k === 'acts') refreshActs = true; else if (k === 'vision') refreshVis = true; else if (k === dataKey) refresh = true;
+              if (k === 'prefs') refreshPrefs = true; else if (k === 'acts') refreshActs = true; else if (k === 'vision') refreshVis = true; else if (k === 'dates') { await loadDates(); refresh = true; } else if (k === dataKey) refresh = true;
             }
           }
         }
@@ -1825,8 +1881,145 @@
   $('#gLast').addEventListener('keydown', e => { if (e.key === 'Enter') $('#gEmail').focus(); });
   $('#gEmail').addEventListener('keydown', e => { if (e.key === 'Enter') $('#gateGo').click(); });
 
+
+  /* ================= Fechas importantes ================= */
+  const DATE_KIND = { cumple: { name: 'Cumpleaños', icon: 'cake' }, aniv: { name: 'Aniversario', icon: 'heart' }, otro: { name: 'Otro', icon: 'sparkle' } };
+  function nthWeekday(year, month, weekday, n) {
+    const first = new Date(year, month, 1);
+    return 1 + ((weekday - first.getDay() + 7) % 7) + (n - 1) * 7;
+  }
+  function lastWeekday(year, month, weekday) {
+    const last = new Date(year, month + 1, 0);
+    return last.getDate() - ((last.getDay() - weekday + 7) % 7);
+  }
+  function easterSunday(year) {
+    const a = year % 19, b = Math.floor(year / 100), c = year % 100, d = Math.floor(b / 4), e = b % 4,
+      f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30,
+      i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451),
+      month = Math.floor((h + l - 7 * m + 114) / 31), day = ((h + l - 7 * m + 114) % 31) + 1;
+    return { month: month - 1, day };
+  }
+  const holidayCache = new Map();
+  function usHolidays(year) {
+    if (holidayCache.has(year)) return holidayCache.get(year);
+    const list = [
+      { month: 0, day: 1, title: 'Año Nuevo' },
+      { month: 0, day: nthWeekday(year, 0, 1, 3), title: 'Día de Martin Luther King Jr.' },
+      { month: 1, day: 14, title: 'Día de San Valentín' },
+      { month: 1, day: nthWeekday(year, 1, 1, 3), title: 'Día de los Presidentes' },
+      { month: 2, day: 17, title: 'Día de San Patricio' },
+      { month: 4, day: nthWeekday(year, 4, 0, 2), title: 'Día de las Madres' },
+      { month: 4, day: lastWeekday(year, 4, 1), title: 'Día de los Caídos' },
+      { month: 5, day: nthWeekday(year, 5, 0, 3), title: 'Día del Padre' },
+      { month: 5, day: 19, title: 'Juneteenth' },
+      { month: 6, day: 4, title: 'Día de la Independencia' },
+      { month: 8, day: nthWeekday(year, 8, 1, 1), title: 'Día del Trabajo' },
+      { month: 9, day: 31, title: 'Halloween' },
+      { month: 10, day: 11, title: 'Día de los Veteranos' },
+      { month: 10, day: nthWeekday(year, 10, 4, 4), title: 'Día de Acción de Gracias' },
+      { month: 11, day: 24, title: 'Nochebuena' },
+      { month: 11, day: 25, title: 'Navidad' },
+      { month: 11, day: 31, title: 'Fin de Año' }
+    ];
+    const e = easterSunday(year); list.push({ month: e.month, day: e.day, title: 'Domingo de Pascua' });
+    holidayCache.set(year, list);
+    return list;
+  }
+  let customDates = { list: [] };
+  async function loadDates() { const v = await kvGet('dates'); customDates = v && Array.isArray(v.list) ? v : { list: [] }; }
+  function saveDates() { customDates._u = Date.now(); setStatus('saving'); kvSet('dates', customDates).then(ok => { if (!ok) persistent = false; setStatus('saved'); scheduleSync(); }); }
+  function specialsOn(y, m, d) {
+    const out = [];
+    usHolidays(y).forEach(h => { if (h.month === m && h.day === d) out.push({ id: null, title: h.title, kind: 'holiday' }); });
+    customDates.list.forEach(c => { if (c.month === m && c.day === d) out.push({ id: c.id, title: c.title, kind: c.kind }); });
+    return out;
+  }
+  function renderDaySpecials() {
+    const box = $('#dSpecials'); box.replaceChildren();
+    if (openDay == null) return;
+    specialsOn(cur.y, cur.m, openDay).forEach(sp => {
+      const row = el('div', { class: 'srow' });
+      const ic = el('span', { class: 'sic' }); ic.innerHTML = svg(sp.kind === 'holiday' ? 'flag' : DATE_KIND[sp.kind].icon, 16, 2.2);
+      row.append(ic, el('span', { class: 'stxt', text: sp.title }));
+      if (sp.id) { const del = el('button', { type: 'button', class: 'sdel', 'aria-label': 'Quitar' }); del.innerHTML = svg('trash', 16, 2.2); del.addEventListener('click', () => { customDates.list = customDates.list.filter(x => x.id !== sp.id); saveDates(); renderDaySpecials(); repaintDay(openDay); }); row.append(del); }
+      box.append(row);
+    });
+  }
+  let dtKind = 'cumple';
+  function renderDtKind() {
+    const box = $('#dtKind'); box.replaceChildren();
+    Object.keys(DATE_KIND).forEach(k => {
+      const b = el('button', { type: 'button', class: 'chip sm', role: 'radio', 'aria-checked': String(dtKind === k) });
+      b.style.setProperty('--cat', 'var(--accent)'); b.innerHTML = svg(DATE_KIND[k].icon, 16, 2.2) + '<span></span>'; b.lastChild.textContent = DATE_KIND[k].name;
+      b.addEventListener('click', () => { dtKind = k; renderDtKind(); });
+      box.append(b);
+    });
+  }
+  let dtReturnDay = null;
+  $('#dDateAdd').addEventListener('click', () => { dtReturnDay = openDay; dtKind = 'cumple'; $('#dtTitle').value = ''; renderDtKind(); openModal('m-date', { focus: '#dtTitle' }); });
+  $('#dtSave').addEventListener('click', () => {
+    const title = $('#dtTitle').value.trim(), day = dtReturnDay;
+    if (!title) { toast('Escribe qué se celebra'); $('#dtTitle').focus(); return; }
+    customDates.list.push({ id: uid(), month: cur.m, day: day, title, kind: dtKind });
+    saveDates(); closeModal(); repaintDay(day); toast('Fecha importante guardada');
+  });
+  onClose['m-date'] = () => { const d = dtReturnDay; dtReturnDay = null; if (d != null) setTimeout(() => openSheet(d), 0); };
+
+  /* ================= Galería ================= */
+  let galleryCache = null, galleryFilter = 'todo';
+  async function loadGallery() {
+    const keys = (await kvKeys()).filter(k => /^m:\d{4}-\d{2}$/.test(k));
+    const cal = [];
+    for (const k of keys) {
+      const v = await kvGet(k); if (!v) continue;
+      const [y, m] = k.slice(2).split('-').map(Number);
+      Object.keys(v.days || {}).forEach(d => { const info = v.days[d]; if (info && info.photo) cal.push({ photo: info.photo, y: y, m: m - 1, d: +d }); });
+      (v.goals || []).forEach(g => { if (g.photo) cal.push({ photo: g.photo, y: y, m: m - 1, goalId: g.id }); });
+    }
+    cal.sort((a, b) => (b.y - a.y) || (b.m - a.m) || ((b.d || 0) - (a.d || 0)));
+    const vis = [];
+    vision.items.forEach(it => (it.photos || []).forEach((p, i) => vis.push({ photo: p, id: it.id, idx: i, title: it.title, created: it.created })));
+    vis.sort((a, b) => b.created - a.created);
+    galleryCache = { cal: cal, vis: vis };
+  }
+  function renderGallery() {
+    const tabs = $('#gTabs'); tabs.replaceChildren();
+    [['todo', 'Todo'], ['cal', 'Calendario'], ['vision', 'My Vision']].forEach(([id, name]) => {
+      const b = el('button', { type: 'button', class: 'chip sm', 'aria-pressed': String(galleryFilter === id) });
+      b.style.setProperty('--cat', 'var(--accent)'); b.textContent = name;
+      b.addEventListener('click', () => { galleryFilter = id; renderGallery(); });
+      tabs.append(b);
+    });
+    const body = $('#gBody'); body.replaceChildren();
+    if (!galleryCache) { body.append(el('p', { class: 'g-empty', text: 'Cargando…' })); return; }
+    const showCal = galleryFilter !== 'vision', showVis = galleryFilter !== 'cal';
+    if (showCal && galleryCache.cal.length) {
+      const grp = el('div', { class: 'ggroup' }); grp.append(el('h3', { text: 'Calendario' }));
+      const grid = el('div', { class: 'ggrid' });
+      galleryCache.cal.forEach(item => {
+        const b = el('button', { type: 'button', class: 'gtile', 'aria-label': 'Ver foto' });
+        const im = el('img', { alt: '' }); im.src = item.photo; b.append(im);
+        b.addEventListener('click', () => { if (item.d) openFromDate(dstr(item.y, item.m, item.d)); else openLb(item.photo); });
+        grid.append(b);
+      });
+      grp.append(grid); body.append(grp);
+    }
+    if (showVis && galleryCache.vis.length) {
+      const grp = el('div', { class: 'ggroup' }); grp.append(el('h3', { text: 'My Vision' }));
+      const grid = el('div', { class: 'ggrid' });
+      galleryCache.vis.forEach(item => {
+        const b = el('button', { type: 'button', class: 'gtile', 'aria-label': 'Ver foto de ' + (item.title || 'My Vision') });
+        const im = el('img', { alt: '' }); im.src = item.photo; b.append(im);
+        b.addEventListener('click', () => { setView('vision'); setTimeout(() => openVision(item.id), 0); });
+        grid.append(b);
+      });
+      grp.append(grid); body.append(grp);
+    }
+    if (!body.children.length) body.append(el('p', { class: 'g-empty', text: 'Todavía no hay fotos aquí. Las fotos que agregues en tus días y en My Vision van a aparecer en esta galería.' }));
+  }
+
   /* ================= Inicio ================= */
-  Promise.all([kvGet('prefs'), kvGet('sync-cfg'), kvGet('push-cfg'), loadActs(), loadVision(), loadNotified()]).then(([p, sc, pc]) => {
+  Promise.all([kvGet('prefs'), kvGet('sync-cfg'), kvGet('push-cfg'), loadActs(), loadVision(), loadNotified(), loadDates()]).then(([p, sc, pc]) => {
     if (sc && sc.code) syncCfg = sc;
     if (pc && pc.secret) pushCfg = pc;
     if (p && typeof p === 'object') prefs = Object.assign(defaultPrefs(), p);
