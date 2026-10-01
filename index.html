@@ -330,7 +330,7 @@
   .gate-err { min-height: 18px; margin: 2px 0 10px; font-size: 13px; font-weight: 700; color: #B0453D; }
 
   /* ---------- Fechas importantes ---------- */
-  .day .special { position: absolute; top: 4px; left: 5px; width: 14px; height: 14px; color: var(--accent); }
+  .day .special { position: absolute; top: 5px; right: 5px; width: 13px; height: 13px; color: var(--accent); }
   .day.has-photo .special { color: #fff; filter: drop-shadow(0 1px 2px rgba(0,0,0,.4)); }
   .specials { display: flex; flex-direction: column; gap: 8px; margin: 0 0 14px; }
   .srow { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 16px; background: var(--bg-a); border: 1px solid var(--line); }
@@ -1004,7 +1004,7 @@
     const dayActs = actsOn(dstr(cur.y, cur.m, d));
     const a0 = dayActs[0];
     const specials = specialsOn(cur.y, cur.m, d), sp0 = specials[0];
-    const hasContent = !!(lines.length || info.photo || cat || info.done || dayActs.length || specials.length);
+    const hasContent = !!(lines.length || info.photo || cat || info.done || dayActs.length);
     const label = lines[0] || (a0 ? (a0.time ? a0.time + ' ' : '') + a0.title : (cat ? cat.name : (sp0 ? sp0.title : (info.done ? 'Completado' : ''))));
     const hasRem = dayActs.some(a => a.remind != null && a.time && !a.done);
     b.className = 'day' + (isToday ? ' today' : '') + (info.photo ? ' has-photo' : '') + (info.done ? ' done' : '') + (filterCat && info.cat && info.cat !== filterCat ? ' dim' : '') + (filterCat && info.cat === filterCat ? ' match' : '');
