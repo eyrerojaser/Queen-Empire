@@ -315,11 +315,17 @@
   .lb { display: flex; flex-direction: column; align-items: center; gap: 14px; max-width: 92vw; margin: auto; }
   .lb img { max-width: min(92vw, 720px); max-height: 76vh; border-radius: 20px; object-fit: contain; }
 
-  /* ---------- Registro (pantalla de bienvenida) ---------- */
-  #gate { z-index: 90; }
-  .gate-sheet { width: 100%; max-width: 440px; margin: auto; padding: 30px 24px calc(30px + env(safe-area-inset-bottom, 0px)); border-radius: 28px; background: var(--surface); text-align: center; }
-  .gate-sheet h2 { margin: 6px 0 4px; font-family: var(--font-logo); font-weight: 400; font-size: 42px; color: var(--accent); }
-  .gate-sheet p.gate-sub { margin: 0 0 20px; font-size: 14.5px; color: var(--ink-soft); }
+  /* ---------- Registro (página de bienvenida) ---------- */
+  #gate { z-index: 90; position: fixed; inset: 0; display: none; flex-direction: column; align-items: center; overflow-y: auto; background: linear-gradient(180deg, color-mix(in srgb, var(--soft) 70%, var(--bg-a)), var(--bg-a) 55%); padding: calc(34px + env(safe-area-inset-top, 0px)) 22px calc(34px + env(safe-area-inset-bottom, 0px)); }
+  #gate.open { display: flex; }
+  .gate-wrap { position: relative; width: 100%; max-width: 440px; margin: auto; }
+  .gate-deco { position: absolute; top: -18px; right: -6px; width: 128px; height: auto; pointer-events: none; }
+  .gate-logo { margin: 0; font-family: var(--font-logo); font-weight: 400; font-size: clamp(40px, 11vw, 52px); color: var(--accent); }
+  .gate-logo span { display: inline-block; width: 20px; height: 20px; margin-left: 4px; vertical-align: -2px; }
+  .gate-kicker { margin: 2px 0 20px; font-size: 12.5px; font-weight: 800; letter-spacing: .08em; color: var(--ink-soft); text-transform: uppercase; }
+  .gate-sheet { width: 100%; padding: 28px 22px calc(26px + env(safe-area-inset-bottom, 0px)); border-radius: 28px; background: var(--surface); border: 1px solid var(--line); text-align: center; }
+  .gate-sheet h2 { margin: 0 0 8px; font-family: var(--font-logo); font-weight: 400; font-size: 40px; color: var(--accent); }
+  .gate-sheet p.gate-sub { margin: 0 0 22px; font-size: 14.5px; line-height: 1.5; color: var(--ink-soft); }
   .gate-sheet .gfield { text-align: left; margin-bottom: 12px; }
   .gate-err { min-height: 18px; margin: 2px 0 10px; font-size: 13px; font-weight: 700; color: #B0453D; }
 
@@ -349,16 +355,21 @@
 </style>
 </head>
 <body>
-<div class="scrim open" id="gate" role="dialog" aria-modal="true" aria-labelledby="gateH">
-  <div class="gate-sheet">
-    <h2 id="gateH">Bienvenida</h2>
-    <p class="gate-sub">Para empezar a usar tu calendario, cuéntame quién eres.</p>
-    <div class="gfield"><label class="lbl" for="gName">Nombre</label><input class="field" id="gName" type="text" maxlength="60" autocomplete="given-name"></div>
-    <div class="gfield"><label class="lbl" for="gLast">Apellido</label><input class="field" id="gLast" type="text" maxlength="60" autocomplete="family-name"></div>
-    <div class="gfield"><label class="lbl" for="gEmail">Correo electrónico</label><input class="field" id="gEmail" type="email" maxlength="160" autocomplete="email" inputmode="email"></div>
-    <input type="text" id="gWeb" name="web" autocomplete="off" tabindex="-1" style="position:absolute;left:-9999px;width:1px;height:1px" aria-hidden="true">
-    <p class="gate-err" id="gateErr"></p>
-    <button class="done-btn solid" id="gateGo" type="button">Continuar</button>
+<div class="open" id="gate" role="dialog" aria-modal="true" aria-labelledby="gateH">
+  <div class="gate-wrap">
+    <svg class="gate-deco" id="gateDeco" viewBox="0 0 220 130" aria-hidden="true"></svg>
+    <p class="gate-logo">Mi Calendario<span id="gateHeart"></span></p>
+    <p class="gate-kicker">Planea · Enfoca · Logra · Disfruta</p>
+    <div class="gate-sheet">
+      <h2 id="gateH">¡Bienvenida!</h2>
+      <p class="gate-sub">Tu espacio para planear tus metas, cuidar tus días y soñar en grande.<br>Cuéntame quién eres para empezar.</p>
+      <div class="gfield"><label class="lbl" for="gName">Nombre</label><input class="field" id="gName" type="text" maxlength="60" autocomplete="given-name"></div>
+      <div class="gfield"><label class="lbl" for="gLast">Apellido</label><input class="field" id="gLast" type="text" maxlength="60" autocomplete="family-name"></div>
+      <div class="gfield"><label class="lbl" for="gEmail">Correo electrónico</label><input class="field" id="gEmail" type="email" maxlength="160" autocomplete="email" inputmode="email"></div>
+      <input type="text" id="gWeb" name="web" autocomplete="off" tabindex="-1" style="position:absolute;left:-9999px;width:1px;height:1px" aria-hidden="true">
+      <p class="gate-err" id="gateErr"></p>
+      <button class="done-btn solid" id="gateGo" type="button">Entrar a mi calendario</button>
+    </div>
   </div>
 </div>
 
@@ -819,7 +830,7 @@
   /* ================= Estado ================= */
   const now0 = new Date();
   let cur = { y: now0.getFullYear(), m: now0.getMonth() };
-  const defaultPrefs = () => ({ weekStart: 1, season: null, name: 'Eyre Rojas', phrase: 'Disciplina hoy, la vida que amo mañana', hero: {}, cats: [] });
+  const defaultPrefs = () => ({ weekStart: 1, season: null, name: '', phrase: 'Disciplina hoy, la vida que amo mañana', hero: {}, cats: [] });
   let prefs = defaultPrefs();
   const blank = () => ({ goals: [], inspo: [], days: {} });
   let data = blank(), dataKey = null;
@@ -915,6 +926,8 @@
     $('#heroDeco').innerHTML = '<g transform="translate(790 -6)">' + CLUSTER[s]() + '</g><g transform="translate(830 346) scale(.85 -.85)">' + CLUSTER[s]() + '</g>';
     $('#topDeco').innerHTML = CLUSTER[s]();
     $('#vDeco').innerHTML = CLUSTER[s]();
+    $('#gateDeco').innerHTML = CLUSTER[s]();
+    $('#gateHeart').innerHTML = svg('heart', 20, 2, 'currentColor');
     $('#goalIco').innerHTML = svg(S.icon, 30, 1.8);
     setThemeColor();
   }
@@ -932,8 +945,8 @@
     $('#phrase').textContent = '“' + prefs.phrase + '”';
     $('#logoHeart').innerHTML = svg('heart', 20, 2);
     $('#yearHeart').innerHTML = svg('heart', 20, 2, 'currentColor');
-    $('#footName').replaceChildren(document.createTextNode(prefs.name || ''));
-    $('#footName').insertAdjacentHTML('beforeend', svg('heart', 20, 2));
+    $('#footName').replaceChildren();
+    if (prefs.name) { $('#footName').append(document.createTextNode(prefs.name)); $('#footName').insertAdjacentHTML('beforeend', svg('heart', 20, 2)); }
     document.title = 'Mi calendario · ' + MONTHS[cur.m] + ' ' + cur.y;
   }
 
