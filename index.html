@@ -274,6 +274,8 @@
   .arow.done .atitle { text-decoration: line-through; color: var(--ink-soft); }
   .abody { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; padding: 4px 0; border: 0; background: transparent; text-align: left; cursor: pointer; }
   .atime { font-size: 14px; font-weight: 800; color: var(--accent); white-space: nowrap; }
+  .adot { flex: none; width: 11px; height: 11px; border-radius: 50%; background: var(--dot, var(--accent)); }
+  .acolors { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
   .atitle { font-size: 15px; font-weight: 700; overflow-wrap: anywhere; }
   .abell { display: inline-flex; align-items: center; gap: 4px; width: 100%; font-size: 12px; color: var(--ink-soft); }
   .add-act { height: 46px; margin: 0 0 6px; border: 2px dashed var(--accent); color: var(--accent); font-weight: 800; }
@@ -350,6 +352,24 @@
   .gtile { position: relative; aspect-ratio: 1; padding: 0; border: 0; border-radius: 14px; overflow: hidden; cursor: pointer; background: var(--soft); }
   .gtile img { display: block; width: 100%; height: 100%; object-fit: cover; }
   .g-empty { margin: 10px 18px; color: var(--ink-soft); font-size: 14px; line-height: 1.5; }
+
+  /* ---------- Detalles animados de la portada ---------- */
+  .hero-particles { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 2; }
+  .particle { position: absolute; top: -12%; filter: drop-shadow(0 2px 3px rgba(0,0,0,.18)); }
+  .particle svg { display: block; width: 100%; height: 100%; }
+  .particle.fall { animation-name: particle-fall; animation-timing-function: linear; animation-iteration-count: infinite; }
+  .particle.float { top: 48%; animation-name: particle-float; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
+  @keyframes particle-fall {
+    0% { transform: translateY(-40px) translateX(0) rotate(0deg); }
+    25% { transform: translateY(90px) translateX(10px) rotate(90deg); }
+    50% { transform: translateY(210px) translateX(-10px) rotate(180deg); }
+    75% { transform: translateY(330px) translateX(10px) rotate(270deg); }
+    100% { transform: translateY(440px) translateX(0) rotate(360deg); }
+  }
+  @keyframes particle-float {
+    0%, 100% { transform: translateY(0) translateX(0) rotate(-6deg); }
+    50% { transform: translateY(-16px) translateX(6px) rotate(6deg); }
+  }
   .toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 80; max-width: 90vw; padding: 12px 18px; border-radius: 99px; background: var(--ink); color: var(--bg-a); font-size: 14px; font-weight: 700; }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
@@ -400,6 +420,7 @@
 
   <section class="hero" aria-label="Portada del mes">
     <div class="hero-bg" id="heroBg"></div>
+    <div class="hero-particles" id="heroParticles" aria-hidden="true"></div>
     <svg class="hero-deco" id="heroDeco" viewBox="0 0 1000 340" preserveAspectRatio="xMaxYMid slice" aria-hidden="true"></svg>
     <button class="hero-nav prev" id="prev" type="button" aria-label="Mes anterior"></button>
     <div class="hero-text">
@@ -588,6 +609,8 @@
       <div><label class="lbl" for="aDate">Fecha</label><input class="field" id="aDate" type="date"></div>
       <div><label class="lbl" for="aTime">Hora</label><input class="field" id="aTime" type="time"></div>
     </div>
+    <p class="lbl">Color</p>
+    <div class="acolors" id="aColor" role="radiogroup" aria-label="Color de la cita"></div>
     <p class="lbl">Recordatorio</p>
     <div class="catpick" id="aRemind" role="radiogroup" aria-label="Recordatorio"></div>
     <p class="hint" id="aRemHint"></p>
@@ -746,6 +769,7 @@
     return '<g transform="translate(' + x + ' ' + y + ') rotate(' + rot + ') scale(' + s + ')" stroke="#3F6B54" stroke-width="3.2" stroke-linecap="round" fill="none"><path d="M0 0L118 0"/>' + n + '<circle cx="60" cy="0" r="5" fill="#C0392B" stroke="none"/><circle cx="73" cy="5" r="4" fill="#C0392B" stroke="none"/></g>';
   };
   const pumpkin = (x, y, s) => '<g transform="translate(' + x + ' ' + y + ') scale(' + s + ')"><ellipse rx="70" ry="56" fill="#E8772E"/><ellipse cx="-38" cy="2" rx="30" ry="54" fill="#F08A3C"/><ellipse cx="38" cy="2" rx="30" ry="54" fill="#F08A3C"/><ellipse rx="26" ry="56" fill="#E06A24"/><path d="M-4 -52C-6 -66 0 -74 8 -76" stroke="#6B4A2B" stroke-width="9" stroke-linecap="round" fill="none"/></g>';
+  const acorn = (x, y, s) => '<g transform="translate(' + x + ' ' + y + ') scale(' + s + ')"><path d="M-27 -4a27 24 0 1 1 54 0c0 22-27 50-27 50s-27-28-27-50z" fill="#A9673A"/><path d="M-31 -6c0-17 15-27 31-27s31 10 31 27c-11-6-21-9-31-9s-20 3-31 9z" fill="#7C4A26"/><path d="M-5 -33c-5-7 2-13 9-11" stroke="#5B3A1E" stroke-width="4.5" stroke-linecap="round" fill="none"/></g>';
   const HELLO_FONT = "'Great Vibes','Snell Roundhand','Brush Script MT',cursive";
   const mug = (x, y, word, c, steam) => '<g transform="translate(' + x + ' ' + y + ')">' +
     (steam ? '<path d="M50 -6c-10-16 10-24 0-40M80 -6c-10-16 10-24 0-40" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" opacity=".75"/>' : '') +
@@ -927,6 +951,7 @@
     $('#topDeco').innerHTML = CLUSTER[s]();
     $('#vDeco').innerHTML = CLUSTER[s]();
     $('#gateDeco').innerHTML = CLUSTER[s]();
+    renderHeroParticles();
     $('#gateHeart').innerHTML = svg('heart', 20, 2, 'currentColor');
     $('#goalIco').innerHTML = svg(S.icon, 30, 1.8);
     setThemeColor();
@@ -1008,7 +1033,7 @@
     const label = lines[0] || (a0 ? (a0.time ? a0.time + ' ' : '') + a0.title : (cat ? cat.name : (sp0 ? sp0.title : (info.done ? 'Completado' : ''))));
     const hasRem = dayActs.some(a => a.remind != null && a.time && !a.done);
     b.className = 'day' + (isToday ? ' today' : '') + (info.photo ? ' has-photo' : '') + (info.done ? ' done' : '') + (filterCat && info.cat && info.cat !== filterCat ? ' dim' : '') + (filterCat && info.cat === filterCat ? ' match' : '');
-    b.style.setProperty('--cat', cat ? cat.color : 'var(--accent)');
+    b.style.setProperty('--cat', cat ? cat.color : ((a0 && a0.color && actColorHex(a0.color)) || 'var(--accent)'));
     b.setAttribute('aria-label', d + ' de ' + MONTHS[cur.m] + (isToday ? ', hoy' : '') + (label ? ', ' + label : '') + (dayActs.length ? ', ' + dayActs.length + (dayActs.length === 1 ? ' actividad' : ' actividades') : '') + (specials.length ? ', ' + specials.map(x => x.title).join(', ') : '') + (info.done ? ', completado' : ''));
     b.replaceChildren();
     const okIcon = () => { const s = el('span', { class: 'ok' }); s.innerHTML = svg('check', 12, 3.4); return s; };
@@ -1473,6 +1498,49 @@
   setInterval(() => { if (syncCfg && !document.hidden) syncNow(); }, 120000);
 
 
+
+  /* ================= Detalles animados de la portada (por mes) ================= */
+  const PARTICLE_SHAPES = {
+    leaf1: () => leaf(0, 0, .5, 0, '#D4541E'),
+    leaf2: () => leaf(0, 0, .46, 0, '#E8912D'),
+    flower: () => flower(0, 0, .85, 0, '#F6B7CB', '#F9D65C'),
+    sun: () => sun(0, 0, 18, '#FFC43D'),
+    lemon: () => lemon(0, 0, 28),
+    flake: () => flake(0, 0, 1.15, .95, '#D7E6F7'),
+    pumpkin: () => pumpkin(0, 0, .46),
+    acorn: () => acorn(0, 0, .85)
+  };
+  const PARTICLE_MOTION = { leaf1: 'fall', leaf2: 'fall', flake: 'fall', flower: 'float', sun: 'float', lemon: 'float', pumpkin: 'float', acorn: 'float' };
+  // "por ejemplo" de la persona: octubre (calabazas/hojas), noviembre (detalles de cosecha), diciembre (nieve) — y el resto sigue la temporada.
+  const MONTH_DECOR = {
+    0: ['flake', 'flake'], 1: ['flake', 'flake'],
+    2: ['flower', 'flower'], 3: ['flower', 'flower'], 4: ['flower', 'flower'],
+    5: ['sun', 'lemon'], 6: ['sun', 'lemon'], 7: ['sun', 'lemon'],
+    8: ['leaf1', 'leaf2'], 9: ['pumpkin', 'leaf1'], 10: ['leaf2', 'acorn'],
+    11: ['flake', 'flake']
+  };
+  function particleSVG(kind) { return '<svg viewBox="-90 -90 180 180" aria-hidden="true">' + PARTICLE_SHAPES[kind]() + '</svg>'; }
+  function renderHeroParticles() {
+    const box = $('#heroParticles'); if (!box) return;
+    box.replaceChildren();
+    if (reduceMotion()) return;   // quien prefiere menos movimiento no ve las partículas animadas
+    const kinds = MONTH_DECOR[cur.m] || ['leaf1'];
+    const COUNT = 7;
+    for (let i = 0; i < COUNT; i++) {
+      const kind = kinds[i % kinds.length];
+      const motion = PARTICLE_MOTION[kind] || 'float';
+      const left = Math.round(6 + (i * (88 / (COUNT - 1))) + (Math.random() * 6 - 3));
+      const size = 20 + Math.round(Math.random() * 18);
+      const dur = motion === 'fall' ? (11 + Math.random() * 7) : (4 + Math.random() * 3);
+      const delay = -(Math.random() * dur);
+      const span = el('span', { class: 'particle ' + motion });
+      span.style.cssText = 'left:' + left + '%; width:' + size + 'px; height:' + size + 'px; animation-duration:' + dur.toFixed(1) + 's; animation-delay:' + delay.toFixed(1) + 's;';
+      span.innerHTML = particleSVG(kind);
+      box.append(span);
+    }
+  }
+  const reduceMotion = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   /* ================= Fechas y actividades con hora ================= */
   const pad2 = n => String(n).padStart(2, '0');
   const dstr = (y, m, d) => y + '-' + pad2(m + 1) + '-' + pad2(d);
@@ -1521,6 +1589,7 @@
       chk.innerHTML = a.done ? svg('check', 14, 3.4) : '';
       chk.addEventListener('click', () => { a.done = !a.done; saveActs(); renderDayActs(); repaintDay(openDay); });
       const body = el('button', { class: 'abody', type: 'button', 'aria-label': 'Editar actividad ' + a.title });
+      if (a.color) { const dot = el('span', { class: 'adot' }); dot.style.setProperty('--dot', actColorHex(a.color)); body.append(dot); }
       body.append(el('span', { class: 'atime', text: a.time ? fmtTime(a.time) : 'Todo el día' }), el('span', { class: 'atitle', text: a.title }));
       if (a.remind != null && a.time && !a.done) {
         const bl = el('span', { class: 'abell' }); bl.innerHTML = svg('bell', 13, 2.2) + '<span></span>'; bl.lastChild.textContent = remindShort(a.remind); body.append(bl);
@@ -1531,7 +1600,7 @@
   }
   $('#dActAdd').addEventListener('click', e => openActModal({ date: dstr(cur.y, cur.m, openDay), fromDay: openDay, from: e.currentTarget }));
 
-  let actEdit = null, actReturnDay = null, actRemind = 15, actDelArm = null;
+  let actEdit = null, actReturnDay = null, actRemind = 15, actDelArm = null, actColorId = null;
   function renderRemindPick() {
     const box = $('#aRemind'); box.replaceChildren();
     const hasTime = !!$('#aTime').value;
@@ -1551,6 +1620,21 @@
   }
   $('#aTime').addEventListener('input', renderRemindPick);
   $('#aTime').addEventListener('change', renderRemindPick);
+  function renderActColors() {
+    const box = $('#aColor'); box.replaceChildren();
+    const none = el('button', { type: 'button', class: 'sw', role: 'radio', 'aria-checked': String(actColorId == null), 'aria-label': 'Sin color' });
+    none.style.setProperty('--cat', 'var(--soft)'); none.innerHTML = svg('x', 14, 2.6);
+    none.style.display = 'grid'; none.style.placeItems = 'center'; none.style.color = 'var(--ink-soft)';
+    none.addEventListener('click', () => { actColorId = null; renderActColors(); });
+    box.append(none);
+    ACT_COLORS.forEach(c => {
+      const b = el('button', { type: 'button', class: 'sw', role: 'radio', 'aria-checked': String(actColorId === c.id), 'aria-label': c.name });
+      b.style.setProperty('--cat', c.hex);
+      if (actColorId === c.id) b.innerHTML = svg('check', 16, 3, '#fff');
+      b.addEventListener('click', () => { actColorId = c.id; renderActColors(); });
+      box.append(b);
+    });
+  }
   function openActModal(o) {
     const a = o.id ? actsRec.list.find(x => x.id === o.id) : null;
     actEdit = a ? a.id : null; actReturnDay = o.fromDay == null ? null : o.fromDay; actDelArm = null;
@@ -1560,8 +1644,9 @@
     $('#aDate').value = date;
     $('#aTime').value = a ? (a.time || '') : (date === todayStr() ? pad2(Math.min(23, new Date().getHours() + 1)) + ':00' : '09:00');
     actRemind = a ? a.remind : 15;
+    actColorId = a ? (a.color || null) : null;
     $('#aDel').hidden = !a; $('#aDelTxt').textContent = 'Eliminar actividad';
-    renderRemindPick();
+    renderRemindPick(); renderActColors();
     openModal('m-act', { from: o.from, focus: '#aTitle' });
   }
   onClose['m-act'] = () => {
@@ -1575,8 +1660,8 @@
     const remind = time ? actRemind : null;
     if (remind != null && 'Notification' in window && Notification.permission === 'default') await enableReminders();
     let a = actEdit ? actsRec.list.find(x => x.id === actEdit) : null;
-    if (a) Object.assign(a, { title: title, date: date, time: time, remind: remind });
-    else { a = { id: uid(), title: title, date: date, time: time, remind: remind, done: false, created: Date.now() }; actsRec.list.push(a); }
+    if (a) Object.assign(a, { title: title, date: date, time: time, remind: remind, color: actColorId });
+    else { a = { id: uid(), title: title, date: date, time: time, remind: remind, color: actColorId, done: false, created: Date.now() }; actsRec.list.push(a); }
     saveActs(); renderCalendar(); closeModal();
     const perm = 'Notification' in window ? Notification.permission : 'unsupported';
     toast(remind != null && perm !== 'granted' ? 'Actividad guardada. Activa las notificaciones para recibir el aviso.' : 'Actividad guardada');
@@ -1897,6 +1982,15 @@
 
   /* ================= Fechas importantes ================= */
   const DATE_KIND = { cumple: { name: 'Cumpleaños', icon: 'cake' }, aniv: { name: 'Aniversario', icon: 'heart' }, otro: { name: 'Otro', icon: 'sparkle' } };
+  const ACT_COLORS = [
+    { id: 'azul', name: 'Azul', hex: '#4C7EDB' },
+    { id: 'lila', name: 'Lila', hex: '#9B7FD4' },
+    { id: 'rosa', name: 'Rosa', hex: '#E07BA0' },
+    { id: 'verde', name: 'Verde', hex: '#4FA06B' },
+    { id: 'amarillo', name: 'Amarillo', hex: '#E0B23E' },
+    { id: 'naranja', name: 'Naranja', hex: '#E8772E' }
+  ];
+  const actColorHex = id => (ACT_COLORS.find(c => c.id === id) || {}).hex;
   function nthWeekday(year, month, weekday, n) {
     const first = new Date(year, month, 1);
     return 1 + ((weekday - first.getDay() + 7) % 7) + (n - 1) * 7;
