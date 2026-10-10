@@ -217,7 +217,7 @@
   .chip-add svg { color: var(--accent); }
 
   /* ============ Pie ============ */
-  .foot { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-top: 12px; padding: 16px 8px 30px; border-top: 1px solid var(--line); }
+  .foot { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 12px; padding: 16px 8px 30px; border-top: 1px solid var(--line); }
   .foot-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 4px; border: 0; background: transparent; cursor: pointer; font-size: 12.5px; font-weight: 700; white-space: nowrap; }
   .foot-name { margin: 0; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; font-family: var(--font-logo); font-size: clamp(22px, 7vw, 30px); color: var(--accent); text-align: center; }
   .foot-name svg { width: .5em; height: .5em; }
@@ -406,11 +406,13 @@
 
   <nav class="nav" aria-label="Secciones">
     <div class="nav-items">
-      <button class="nav-btn active" type="button" data-nav="home"><i data-ic="home"></i><span>Inicio</span></button>
+      <button class="nav-btn" type="button" data-nav="home"><i data-ic="home"></i><span>Inicio</span></button>
       <button class="nav-btn" type="button" data-nav="goals"><i data-ic="target"></i><span>Metas</span></button>
-      <button class="nav-btn" type="button" data-nav="cal"><i data-ic="calendar"></i><span>Calendario</span></button>
+      <button class="nav-btn active" type="button" data-nav="cal"><i data-ic="calendar"></i><span>Calendario</span></button>
       <button class="nav-btn" type="button" data-nav="gallery"><i data-ic="image"></i><span>Galería</span></button>
       <button class="nav-btn" type="button" data-nav="vision"><i data-ic="eye"></i><span>My Vision</span></button>
+      <button class="nav-btn" type="button" id="profBtn"><i data-ic="user"></i><span>Mi perfil</span></button>
+      <button class="nav-btn" type="button" id="setBtn"><i data-ic="sliders"></i><span>Configuración</span></button>
     </div>
     <button class="add-btn" id="addBtn" type="button"><i data-ic="plus"></i><span>Agregar</span></button>
   </nav>
@@ -419,7 +421,7 @@
 
   <div class="seasons" id="seasons" role="group" aria-label="Estación del año"></div>
 
-  <section class="hero" aria-label="Portada del mes">
+  <section class="hero" hidden aria-label="Portada del mes">
     <div class="hero-bg" id="heroBg"></div>
     <div class="hero-particles" id="heroParticles" aria-hidden="true"></div>
     <svg class="hero-deco" id="heroDeco" viewBox="0 0 1000 340" preserveAspectRatio="xMaxYMid slice" aria-hidden="true"></svg>
@@ -446,7 +448,7 @@
     <div class="goals-row" id="goals"></div>
   </section>
 
-  <main class="panel" id="calPanel" hidden aria-label="Calendario">
+  <main class="panel" id="calPanel" aria-label="Calendario">
     <div class="wk" id="wk" aria-hidden="true"></div>
     <div class="grid" id="grid"></div>
     <section class="cats" aria-label="Categorías">
@@ -474,9 +476,7 @@
   </section>
 
   <footer class="foot">
-    <button class="foot-btn" id="profBtn" type="button"><i data-ic="user"></i>Mi perfil</button>
     <p class="foot-name" id="footName"></p>
-    <button class="foot-btn" id="setBtn" type="button"><i data-ic="sliders"></i>Configuración</button>
   </footer>
 </div>
 
@@ -1239,7 +1239,7 @@
 
   /* ================= Navegación ================= */
   const smooth = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
-  let view = 'home';
+  let view = 'cal';
   function setView(v, o) {
     view = v; o = o || {};
     $('.hero').hidden = (v !== 'home');
@@ -1247,14 +1247,14 @@
     $('#calPanel').hidden = v !== 'cal';
     $('#visionView').hidden = v !== 'vision';
     $('#galleryView').hidden = v !== 'gallery';
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.nav === v));
+    document.querySelectorAll('.nav-btn[data-nav]').forEach(b => b.classList.toggle('active', b.dataset.nav === v));
     if (v === 'vision') renderVision();
     if (v === 'gallery') { renderGallery(); loadGallery().then(renderGallery); }
     const act = $('.nav-btn.active'), box = $('.nav-items');
     if (act && box) box.scrollTo({ left: Math.max(0, act.offsetLeft - 12), behavior: 'auto' });
     try { history.replaceState(null, '', v === 'vision' ? '#vision' : location.pathname + location.search); } catch (e) {}
   }
-  document.querySelectorAll('.nav-btn').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.nav-btn[data-nav]').forEach(b => b.addEventListener('click', () => {
     const k = b.dataset.nav;
     closeModal(true);
     setView(k);

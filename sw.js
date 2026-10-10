@@ -1,7 +1,7 @@
 /* Mi Calendario · service worker
    Guarda la app en el dispositivo para que abra al instante y funcione sin Internet.
    Si cambias algún archivo de la app, sube el número de VERSION para que se actualice. */
-const VERSION = 'mi-calendario-v13';
+const VERSION = 'mi-calendario-v14';
 const ASSETS = [
   './', './index.html', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png', './icons/maskable-512.png', './icons/apple-touch-icon.png', './icons/badge-96.png',
