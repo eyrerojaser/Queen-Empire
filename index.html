@@ -151,8 +151,9 @@
   .cover-btn { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border: 0; border-radius: 99px; cursor: pointer; font-size: 13px; font-weight: 700; color: var(--ink); background: color-mix(in srgb, var(--surface) 92%, transparent); }
 
   /* ============ Panel: metas + calendario ============ */
-  .panel { position: relative; z-index: 5; margin: -30px 4px 0; padding: 18px 10px 16px; border-radius: 34px; background: var(--panel); border: 1px solid var(--line); }
-  @media (min-width: 640px) { .panel { margin: -30px 16px 0; padding: 22px 18px 20px; } }
+  .panel, .goals-sec { position: relative; z-index: 5; margin: -30px 4px 0; padding: 18px 10px 16px; border-radius: 34px; background: var(--panel); border: 1px solid var(--line); }
+  .hero[hidden] ~ .goals-sec, .hero[hidden] ~ .panel { margin-top: 18px; }
+  @media (min-width: 640px) { .panel, .goals-sec { margin: -30px 16px 0; padding: 22px 18px 20px; } }
   .sec-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
   .sec-title { margin: 0; display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 800; scroll-margin-top: 12px; }
   .sec-ico { display: grid; place-items: center; width: 30px; height: 30px; color: var(--accent); }
@@ -172,9 +173,9 @@
   .gcard.add { flex-direction: column; justify-content: center; gap: 6px; padding: 0 12px; border: 2px dashed var(--accent); background: transparent; color: var(--accent); font-weight: 800; font-size: 14px; text-align: center; }
 
   .wk { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; margin: 16px 0 8px; padding: 9px 4px; border-radius: 99px; background: var(--soft); text-align: center; font-size: clamp(10px, 2.7vw, 14px); font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); scroll-margin-top: 12px; }
-  .grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: clamp(4px, 1.2vw, 10px); }
+  .grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: clamp(5px, 1.4vw, 12px); }
 
-  .day { position: relative; aspect-ratio: .68; padding: clamp(3px, 1vw, 7px); display: flex; flex-direction: column; align-items: stretch; gap: clamp(2px, .8vw, 5px); overflow: hidden; text-align: left; cursor: pointer; border: 1px solid var(--line); border-radius: clamp(10px, 2.4vw, 16px); background: var(--surface); -webkit-appearance: none; appearance: none; }
+  .day { position: relative; aspect-ratio: .82; padding: clamp(4px, 1.2vw, 8px); display: flex; flex-direction: column; align-items: stretch; gap: clamp(2px, .8vw, 5px); overflow: hidden; text-align: left; cursor: pointer; border: 1px solid var(--line); border-radius: clamp(10px, 2.4vw, 16px); background: var(--surface); -webkit-appearance: none; appearance: none; }
   @media (min-width: 560px) { .day { aspect-ratio: 1 / 1.02; } }
   .day:hover { border-color: var(--accent); }
   .num { position: relative; z-index: 2; padding-left: 2px; font-size: clamp(10px, 2.8vw, 15px); font-weight: 800; line-height: 1; }
@@ -437,20 +438,22 @@
     <input type="file" id="coverFile" accept="image/*" hidden>
   </section>
 
-  <main class="panel">
+  <section class="goals-sec" id="goalsSec" hidden aria-label="Mis metas">
     <div class="sec-row">
       <h2 class="sec-title" id="goalsHead"><span class="sec-ico" id="goalIco"></span>Mis metas de este mes</h2>
       <p class="dream" aria-hidden="true">Sueña · Planifica · Hazlo</p>
     </div>
     <div class="goals-row" id="goals"></div>
+  </section>
+
+  <main class="panel" id="calPanel" hidden aria-label="Calendario">
     <div class="wk" id="wk" aria-hidden="true"></div>
     <div class="grid" id="grid"></div>
+    <section class="cats" aria-label="Categorías">
+      <h2>Categorías</h2>
+      <div class="chips" id="chips"></div>
+    </section>
   </main>
-
-  <section class="cats" aria-label="Categorías">
-    <h2>Categorías</h2>
-    <div class="chips" id="chips"></div>
-  </section>
 
   <section class="gallery" id="galleryView" hidden aria-label="Galería">
     <div class="ghero"><h2>Galería</h2></div>
@@ -1236,13 +1239,15 @@
 
   /* ================= Navegación ================= */
   const smooth = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
-  let view = 'cal';
+  let view = 'home';
   function setView(v, o) {
     view = v; o = o || {};
-    ['.hero', '.panel', '.cats'].forEach(q => { $(q).hidden = v !== 'cal'; });
+    $('.hero').hidden = (v !== 'home');
+    $('#goalsSec').hidden = v !== 'goals';
+    $('#calPanel').hidden = v !== 'cal';
     $('#visionView').hidden = v !== 'vision';
     $('#galleryView').hidden = v !== 'gallery';
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', (v === 'vision' || v === 'gallery') ? b.dataset.nav === v : b.dataset.nav === (o.nav || 'home')));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.nav === v));
     if (v === 'vision') renderVision();
     if (v === 'gallery') { renderGallery(); loadGallery().then(renderGallery); }
     const act = $('.nav-btn.active'), box = $('.nav-items');
@@ -1252,14 +1257,8 @@
   document.querySelectorAll('.nav-btn').forEach(b => b.addEventListener('click', () => {
     const k = b.dataset.nav;
     closeModal(true);
-    if (k === 'vision' || k === 'gallery') { setView(k); window.scrollTo({ top: 0, behavior: smooth() }); return; }
-    if (view !== 'cal') setView('cal', { nav: k });
-    document.querySelectorAll('.nav-btn').forEach(x => x.classList.toggle('active', x === b));
-    requestAnimationFrame(() => {
-      if (k === 'home') window.scrollTo({ top: 0, behavior: smooth() });
-      else if (k === 'goals') $('#goalsHead').scrollIntoView({ behavior: smooth(), block: 'start' });
-      else if (k === 'cal') $('#wk').scrollIntoView({ behavior: smooth(), block: 'start' });
-    });
+    setView(k);
+    window.scrollTo({ top: 0, behavior: smooth() });
   }));
 
   function showMonth() {
@@ -1286,6 +1285,12 @@
   $('#addBtn').addEventListener('click', e => {
     closeModal(true);
     if (view === 'vision') { newVisionNote(); return; }
+    if (view === 'goals') {
+      if (data.goals.length >= MAX_GOALS) { toast('Ya tienes el máximo de metas este mes'); return; }
+      const g = { id: uid(), text: '', done: false, photo: null };
+      data.goals.push(g); renderGoals(); openGoal(g.id, e.currentTarget);
+      return;
+    }
     openActModal({ date: todayStr(), from: e.currentTarget });
   });
 
