@@ -406,7 +406,6 @@
 
   <nav class="nav" aria-label="Secciones">
     <div class="nav-items">
-      <button class="nav-btn" type="button" data-nav="home"><i data-ic="home"></i><span>Inicio</span></button>
       <button class="nav-btn" type="button" data-nav="goals"><i data-ic="target"></i><span>Metas</span></button>
       <button class="nav-btn active" type="button" data-nav="cal"><i data-ic="calendar"></i><span>Calendario</span></button>
       <button class="nav-btn" type="button" data-nav="gallery"><i data-ic="image"></i><span>Galería</span></button>
@@ -421,7 +420,7 @@
 
   <div class="seasons" id="seasons" role="group" aria-label="Estación del año"></div>
 
-  <section class="hero" hidden aria-label="Portada del mes">
+  <section class="hero" aria-label="Portada del mes">
     <div class="hero-bg" id="heroBg"></div>
     <div class="hero-particles" id="heroParticles" aria-hidden="true"></div>
     <svg class="hero-deco" id="heroDeco" viewBox="0 0 1000 340" preserveAspectRatio="xMaxYMid slice" aria-hidden="true"></svg>
@@ -1242,7 +1241,7 @@
   let view = 'cal';
   function setView(v, o) {
     view = v; o = o || {};
-    $('.hero').hidden = (v !== 'home');
+    $('.hero').hidden = (v !== 'cal');
     $('#goalsSec').hidden = v !== 'goals';
     $('#calPanel').hidden = v !== 'cal';
     $('#visionView').hidden = v !== 'vision';
